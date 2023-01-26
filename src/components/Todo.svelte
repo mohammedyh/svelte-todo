@@ -4,14 +4,47 @@
 	// Prop type definitions
 	type CompleteTodoType = (id: string) => void;
 	type RemoveTodoType = (id: string) => void;
+	type EditTodoType = (id: string, newTodoText: string) => void;
 
 	// Props
 	export let todo: ITodo;
 	export let completeTodo: CompleteTodoType;
 	export let removeTodo: RemoveTodoType;
+	export let editTodo: EditTodoType;
+
+	let editing = false;
+
+	function toggleEdit(): void {
+		editing = !editing;
+	}
+
+	function handleEdit(event: KeyboardEvent, id: string): void {
+		let pressedKey = event.key;
+		let targetElement = event.target as HTMLInputElement;
+		let newTodoText = targetElement.value;
+
+		switch (pressedKey) {
+			case 'Escape':
+				targetElement.blur();
+				break;
+			case 'Enter':
+				editTodo(id, newTodoText);
+				targetElement.blur();
+				break;
+		}
+	}
+
+	function handleBlur(event: FocusEvent, id: string): void {
+		let targetElement = event.target as HTMLInputElement;
+		let newTodoText = targetElement.value;
+
+		editTodo(id, newTodoText);
+		targetElement.blur();
+		editing = false;
+	}
 </script>
 
-<li class="todo">
+<li class:editing class="todo">
 	<div class="todo-item">
 		<div>
 			<input
@@ -25,14 +58,29 @@
 			<label aria-label="Check todo" class="todo-check" for="todo" />
 		</div>
 
-		<span class:completed={todo.completed} class="todo-text">{todo.text}</span>
+		<span
+			on:dblclick={toggleEdit}
+			class:completed={todo.completed}
+			class="todo-text">{todo.text}</span
+		>
 		<button
 			on:click={() => removeTodo(todo.id)}
 			aria-label="Remove todo"
 			class="remove"
 		/>
-		<!-- <input class="edit" type="text" autofocus /> -->
 	</div>
+
+	{#if editing}
+		<!-- svelte-ignore a11y-autofocus -->
+		<input
+			on:keydown={event => handleEdit(event, todo.id)}
+			on:blur={event => handleBlur(event, todo.id)}
+			class="edit"
+			type="text"
+			value={todo.text}
+			autofocus
+		/>
+	{/if}
 </li>
 
 <style>

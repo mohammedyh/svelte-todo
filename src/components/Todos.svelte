@@ -43,6 +43,11 @@
 	function removeTodo(id: string) {
 		todos = todos.filter(todo => todo.id !== id);
 	}
+
+	function editTodo(id: string, newTodoText: string) {
+		let currentTodo = todos.findIndex(todo => todo.id === id);
+		todos[currentTodo].text = newTodoText;
+	}
 </script>
 
 <main>
@@ -54,7 +59,7 @@
 		{#if todosAmount}
 			<ul class="todo-list">
 				{#each todos as todo (todo.id)}
-					<Todo {todo} {completeTodo} {removeTodo} />
+					<Todo {todo} {completeTodo} {removeTodo} {editTodo} />
 				{/each}
 			</ul>
 
