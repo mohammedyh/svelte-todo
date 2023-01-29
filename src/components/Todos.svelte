@@ -48,7 +48,7 @@
 
 	function editTodo(id: string, newTodoText: string) {
 		let currentTodo = $todos.findIndex(todo => todo.id === id);
-		todos[currentTodo].text = newTodoText;
+		$todos[currentTodo].text = newTodoText;
 	}
 
 	function setFilter(newFilter: FiltersType): void {
