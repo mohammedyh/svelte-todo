@@ -1,7 +1,10 @@
 <script lang="ts">
-	import type { ITodo } from '$root/types/todo';
+	import type { ITodo, FiltersType } from '$root/types/todo';
 	import AddTodo from './AddTodo.svelte';
 	import Todo from './Todo.svelte';
+	import TodosLeft from './TodosLeft.svelte';
+	import FilterTodos from './FilterTodos.svelte';
+	import ClearTodos from './ClearTodos.svelte';
 
 	let todos: ITodo[] = [
 		{ id: '1e4a59703af84', text: 'Todo 1', completed: true },
@@ -10,8 +13,12 @@
 		{ id: '53ae48bf605cc', text: 'Todo 4', completed: false },
 	];
 
-	$: console.log(todos);
-	$: todosAmount = todos.filter(todo => !todo.completed).length;
+	let selectedFilter: FiltersType = 'all';
+
+	$: todosAmount = todos.length;
+	$: incompleteTodos = todos.filter(todo => !todo.completed).length;
+	$: filteredTodos = filterTodos(todos, selectedFilter);
+	$: completedTodos = todos.filter(todo => todo.completed).length;
 
 	function generateRandomId() {
 		return Math.random().toString(16).slice(2);
@@ -48,6 +55,25 @@
 		let currentTodo = todos.findIndex(todo => todo.id === id);
 		todos[currentTodo].text = newTodoText;
 	}
+
+	function setFilter(newFilter: FiltersType): void {
+		selectedFilter = newFilter;
+	}
+
+	function filterTodos(todos: ITodo[], filter: FiltersType): ITodo[] {
+		switch (filter) {
+			case 'all':
+				return todos;
+			case 'active':
+				return todos.filter(todo => !todo.completed);
+			case 'completed':
+				return todos.filter(todo => todo.completed);
+		}
+	}
+
+	function clearCompleted(): void {
+		todos = todos.filter(todo => !todo.completed);
+	}
 </script>
 
 <main>
@@ -58,19 +84,15 @@
 
 		{#if todosAmount}
 			<ul class="todo-list">
-				{#each todos as todo (todo.id)}
+				{#each filteredTodos as todo (todo.id)}
 					<Todo {todo} {completeTodo} {removeTodo} {editTodo} />
 				{/each}
 			</ul>
 
 			<div class="actions">
-				<span class="todo-count">{todosAmount} left</span>
-				<div class="filters">
-					<button class="filter">All</button>
-					<button class="filter">Active</button>
-					<button class="filter">Completed</button>
-				</div>
-				<button class="clear-completed">Clear completed</button>
+				<TodosLeft {incompleteTodos} />
+				<FilterTodos {selectedFilter} {setFilter} />
+				<ClearTodos {completedTodos} {clearCompleted} />
 			</div>
 		{:else}
 			<p class="todos-empty">You have no todos</p>
@@ -79,8 +101,6 @@
 </main>
 
 <style>
-	/* Todos */
-
 	.title {
 		font-size: var(--font-80);
 		font-weight: inherit;
@@ -126,28 +146,6 @@
 			0 9px 1px -3px hsla(0, 0%, 0%, 0.2), 0 16px 0 -6px hsl(0, 0%, 96%),
 			0 17px 2px -6px hsla(0, 0%, 0%, 0.2);
 		z-index: -1;
-	}
-
-	/* Filters */
-
-	.filters {
-		display: flex;
-		gap: var(--spacing-4);
-	}
-
-	.filter {
-		text-transform: capitalize;
-		padding: var(--spacing-4) var(--spacing-8);
-		border: 1px solid transparent;
-		border-radius: var(--radius-base);
-	}
-
-	.filter:hover {
-		border: 1px solid var(--color-highlight);
-	}
-
-	.selected {
-		border-color: var(--color-highlight);
 	}
 
 	.todos-empty {
