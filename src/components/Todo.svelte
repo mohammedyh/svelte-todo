@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { slide, fade } from 'svelte/transition';
 	import type { ITodo } from '$root/types/todo';
 
-	// Prop type definitions
 	type CompleteTodoType = (id: string) => void;
 	type RemoveTodoType = (id: string) => void;
 	type EditTodoType = (id: string, newTodoText: string) => void;
 
-	// Props
 	export let todo: ITodo;
 	export let completeTodo: CompleteTodoType;
 	export let removeTodo: RemoveTodoType;
@@ -44,7 +43,7 @@
 	}
 </script>
 
-<li class:editing class="todo">
+<li in:slide out:slide class:editing class="todo">
 	<div class="todo-item">
 		<div>
 			<input
